@@ -1,6 +1,9 @@
 import PropTypes from "prop-types";
 
 const UserCard = ({ user }) => {
+  if (!user) {
+    return <p>Loading...</p>; // Display a loading message instead of crashing
+  }
   const { firstName, lastName, age, gender, about, photoUrl } = user;
 
   return (
