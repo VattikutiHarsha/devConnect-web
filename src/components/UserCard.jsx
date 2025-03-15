@@ -1,10 +1,26 @@
 import PropTypes from "prop-types";
+import { BASE_URL } from "../utils/constants";
+import axios from "axios";
+import { useDispatch } from "react-redux";
+import { removeUserFromFeed } from "../utils/feedSlice";
 
 const UserCard = ({ user }) => {
+  const dispatch = useDispatch();
+
   if (!user) {
-    return <p>Loading...</p>; // Display a loading message instead of crashing
+    return <p>No new users found!</p>;
   }
-  const { firstName, lastName, age, gender, about, photoUrl } = user;
+  const { _id, firstName, lastName, age, gender, about, photoUrl } = user;
+
+  const handleSendRequest = async (status, userId) => {
+    try {
+      const res = await axios.post(BASE_URL + "/request/send/" + status + "/" + userId, {}, {withCredentials: true});
+      console.log(res);
+      dispatch(removeUserFromFeed(userId));
+    } catch (err) {
+      console.log("ERROR: ", err.message);
+    }
+  }
 
   return (
     <div className="card bg-base-300 w-96 shadow-xl">
@@ -18,8 +34,8 @@ const UserCard = ({ user }) => {
     {age && gender && <p>{age + ", " + gender}</p>}
     <p>{about}</p>
     <div className="card-actions justify-center my-4">
-      <button className="btn btn-primary">Ignore</button>
-      <button className="btn btn-secondary">Interested</button>
+      <button className="btn btn-primary" onClick={() => handleSendRequest("ignored", _id)}>Ignore</button>
+      <button className="btn btn-secondary" onClick={() => handleSendRequest("interested", _id)}>Interested</button>
     </div>
   </div>
 </div>
@@ -29,6 +45,7 @@ const UserCard = ({ user }) => {
 // Add prop validation
 UserCard.propTypes = {
   user: PropTypes.shape({
+    _id: PropTypes.string,
     firstName: PropTypes.string.isRequired,
     lastName: PropTypes.string,
     age: PropTypes.number,
